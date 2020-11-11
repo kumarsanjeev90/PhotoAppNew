@@ -58,9 +58,7 @@ public class UserController {
 		List<UserResponseModel> returnValue = new ArrayList<>();
 		List<UserDto> userDto = userService.getUsers(page, limit);
 		
-//			UserResponseModel userResponseModel = new UserResponseModel();
-//			BeanUtils.copyProperties(user, userResponseModel);
-//			returnValue.add(userResponseModel);
+
 			
 		Type listType = new TypeToken<List<UserResponseModel>>() {}.getType();
 		returnValue = mp.map(userDto, listType);
