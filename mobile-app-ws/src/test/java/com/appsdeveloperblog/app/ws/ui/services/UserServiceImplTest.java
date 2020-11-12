@@ -68,7 +68,7 @@ class UserServiceImplTest {
 	}
 
 //	@Test
-//	final <S> void testCreateUser() {
+//	final void testCreateUser() {
 //		when(userRepos.findUserByEmail(anyString())).thenReturn(null);
 //		when(utils.generateAddressId(anyInt())).thenReturn("dsdfefwefwef");
 //		when(utils.generateUserId(anyInt())).thenReturn(userId);

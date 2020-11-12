@@ -2,12 +2,15 @@ package com.appsdeveloperblog.app.ws.ui.controllers;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.MediaType;
@@ -69,7 +72,7 @@ public class UserController {
 	@GetMapping(path="/{userId}", produces= { MediaType.APPLICATION_XML_VALUE,
 			MediaType.APPLICATION_JSON_VALUE }
 	 )
-	public UserResponseModel showUser(@PathVariable("userId") String userId) {
+	public UserResponseModel getUser(@PathVariable("userId") String userId) {
 		UserResponseModel userResponse = new UserResponseModel();
 		UserDto userDto = userService.getUserByUserId(userId);
 		BeanUtils.copyProperties(userDto, userResponse);
@@ -112,7 +115,7 @@ public class UserController {
 	public OperationStatusModel deleteUser(@PathVariable String userId) {
 		OperationStatusModel returnValue = new OperationStatusModel();
 		returnValue.setOperationName(RequestOperationName.DELETE.name());
-		returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+
 		userService.deleteUser(userId);
 		returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
 		return returnValue;
@@ -120,7 +123,7 @@ public class UserController {
 
 	@GetMapping(path="/{userId}/addresses",
 			produces= { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
-	public List<AddressResponseModel> getUserAddresses(@PathVariable String userId) {
+	public CollectionModel<AddressResponseModel> getUserAddresses(@PathVariable String userId) {
 		
 		List<AddressResponseModel> returnValue = new ArrayList<>();
 		List<AddressDTO> addressDtos = addressService.getAddresses(userId);
@@ -129,23 +132,30 @@ public class UserController {
 			ModelMapper mp = new ModelMapper();
 			returnValue = mp.map(addressDtos, listType);
 		}
-		
-	return returnValue;
+		Link userLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+				.getUserAddresses(userId)).withRel("addresses");
+		Link userAddressesLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+				.getUserAddresses(userId)).withSelfRel();
+		return CollectionModel.of(returnValue, userLink, userAddressesLink);
+
 	}
 
 	
 	@GetMapping(path="/{userId}/addresses/{addressId}",
 			produces= { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
 
-	public AddressResponseModel getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
+	public EntityModel<AddressResponseModel> getUserAddress(@PathVariable String userId, @PathVariable String addressId) {
 
 		AddressDTO addressDto = addressService.getAddress(addressId);
 		ModelMapper modelMapper = new ModelMapper();
 		AddressResponseModel returnValue = modelMapper.map(addressDto, AddressResponseModel.class);
 		//start creating links for the Hateoas
-		Link userLink = WebMvcLinkBuilder.linkTo(UserController.class)
-				.slash(userId)
-				.withRel("user");
+//		Link userLink = WebMvcLinkBuilder.linkTo(UserController.class)
+//				.slash(userId)
+//				.withRel("user");
+		
+		Link userLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+				.getUserAddresses(userId)).withRel("addresses");
 		//WebMvcLinkBuilder class is used to build link. It has a method called linkTo
 		//that takes in a controller argument. This will create a link that starts with
 		//http://<our machine name>:<portnumber>/<request mapping of the controller>/<userId>
@@ -155,26 +165,32 @@ public class UserController {
 		
 		
 		//http://localhost:8080/users/{userId}/addresses/{addressId}
-		Link userAddressesLink = WebMvcLinkBuilder.linkTo(UserController.class)
-				.slash(userId)
-				.slash("addresses")
+		
+		//WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).slash("addresses").withRel("addresses");
+		Link userAddressesLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+				.getUserAddress(userId, addressId))
+				//.slash(userId)
+				//.slash("addresses")
 				.withRel("addresses");
 		
 		
 		
 		//for creating a link to this resource itself. it is going to be a self link
 		//http://localhost:8080/users/userId/addresses/addressId
-		Link selfLink = WebMvcLinkBuilder.linkTo(UserController.class)
-				.slash(userId)
-				.slash("addresses")
-				.slash(addressId)
+		//WebMvcLinkBuilder.linkTo(UserController.class).slash(userId).slash("addresses").slash(addressId).withSelfRel();
+		Link selfLink = WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder.methodOn(UserController.class)
+				.getUserAddress(userId, addressId))
+//				.slash(userId)
+		//		.slash("addresses")
+	//			.slash(addressId)
 				.withSelfRel();
 		
 		
-		returnValue.add(userLink);
-		returnValue.add(userAddressesLink);
-		returnValue.add(selfLink);
-		return returnValue;
+//		returnValue.add(userLink);
+//		returnValue.add(userAddressesLink);
+//		returnValue.add(selfLink);
+		return EntityModel.of(returnValue, Arrays.asList(userLink, userAddressesLink, selfLink));
+		
 	}
 	
 	@GetMapping(path="/email-verification", produces= {MediaType.APPLICATION_JSON_VALUE,
