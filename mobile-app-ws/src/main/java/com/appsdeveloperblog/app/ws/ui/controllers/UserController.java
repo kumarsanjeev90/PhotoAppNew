@@ -36,7 +36,7 @@ import com.appsdeveloperblog.app.ws.ui.models.response.RequestOperationName;
 import com.appsdeveloperblog.app.ws.ui.models.response.RequestOperationStatus;
 import com.appsdeveloperblog.app.ws.ui.models.response.UserResponseModel;
 import com.appsdeveloperblog.app.ws.ui.services.AddressService;
-import com.appsdeveloperblog.app.ws.ui.services.UserService;
+import com.appsdeveloperblog.app.ws.ui.services.UserServiceImpl;
 import com.appsdeveloperblog.app.ws.ui.shared.AddressDTO;
 import com.appsdeveloperblog.app.ws.ui.shared.UserDto;
 
@@ -46,7 +46,7 @@ import com.appsdeveloperblog.app.ws.ui.shared.UserDto;
 public class UserController {
 
 	@Autowired
-	private UserService userService;
+	private UserServiceImpl userService;
 	
 	@Autowired
 	private AddressService addressService;

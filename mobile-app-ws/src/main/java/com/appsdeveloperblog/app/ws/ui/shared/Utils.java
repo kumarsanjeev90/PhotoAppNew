@@ -36,10 +36,13 @@ public class Utils {
 	}
 	
 	public static Boolean hasTokenExpired(String token) {
+//		Claims claims = Jwts.parser()
+//				.setSigningKey(SecurityConstants.getTokenSecret())
+//				.parseClaimsJws(token).getBody();
 		Claims claims = Jwts.parser()
 				.setSigningKey(SecurityConstants.getTokenSecret())
 				.parseClaimsJws(token).getBody();
-		
+//		Date tokenExpirationDate = claims.getExpiration();
 		Date tokenExpirationDate = claims.getExpiration();
 		Date todayDate = new Date();
 		return tokenExpirationDate.before(todayDate);
