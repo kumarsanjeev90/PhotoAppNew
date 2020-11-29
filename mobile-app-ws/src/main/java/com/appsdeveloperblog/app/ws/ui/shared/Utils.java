@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.appsdeveloperblog.app.ws.security.SecurityConstants;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -36,16 +37,20 @@ public class Utils {
 	}
 	
 	public static Boolean hasTokenExpired(String token) {
-//		Claims claims = Jwts.parser()
-//				.setSigningKey(SecurityConstants.getTokenSecret())
-//				.parseClaimsJws(token).getBody();
+
+		boolean returnValue = false;
+		try {
 		Claims claims = Jwts.parser()
 				.setSigningKey(SecurityConstants.getTokenSecret())
 				.parseClaimsJws(token).getBody();
-//		Date tokenExpirationDate = claims.getExpiration();
 		Date tokenExpirationDate = claims.getExpiration();
 		Date todayDate = new Date();
-		return tokenExpirationDate.before(todayDate);
+		returnValue = tokenExpirationDate.before(todayDate);
+		}
+		catch(ExpiredJwtException ex) {
+			returnValue = true;
+		}
+		return returnValue;
 		
 		
 		

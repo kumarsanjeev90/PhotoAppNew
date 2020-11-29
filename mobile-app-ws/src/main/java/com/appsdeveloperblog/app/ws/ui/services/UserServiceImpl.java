@@ -41,11 +41,14 @@ public class UserServiceImpl implements UserService {
 	@Autowired
 	PasswordResetTokenRepository passwordResetTokenRepos;
 
+	@Autowired
+	AmazonSES amazonSES;
+	
 	@Override
 	public UserDto createUser(UserDto userDto) {
 		UserEntity userEntity = new UserEntity();
 		if (userRepos.findUserByEmail(userDto.getEmail()) != null)
-			throw new RuntimeException("Record already exists");
+			throw new UserServiceException("Record already exists");
 
 		for (int i = 0; i < userDto.getAddresses().size(); i++) {
 			AddressDTO addressDto = userDto.getAddresses().get(i);
@@ -68,7 +71,7 @@ public class UserServiceImpl implements UserService {
 		UserDto newUserDto = new UserDto();
 		newUserDto = mp.map(storedUser, UserDto.class);
 		// send an email to the user to verify their email address
-		new AmazonSES().verifyEmail(newUserDto);
+		amazonSES.verifyEmail(newUserDto);
 		return newUserDto;
 	}
 
@@ -212,7 +215,7 @@ public class UserServiceImpl implements UserService {
 
 		// remove password reset token from the database
 		passwordResetTokenRepos.delete(passwordResetTokenEntity);
-
+		
 		return returnValue;
 	}
 

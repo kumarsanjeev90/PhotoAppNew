@@ -41,7 +41,7 @@ import com.appsdeveloperblog.app.ws.ui.shared.AddressDTO;
 import com.appsdeveloperblog.app.ws.ui.shared.UserDto;
 
 @RestController
-@RequestMapping("users")
+@RequestMapping("/mobile-app-ws/users")
 @CrossOrigin(origins = {"http://localhost:8083", "http://localhost:8084"})
 public class UserController {
 
@@ -225,11 +225,14 @@ public class UserController {
 		OperationStatusModel returnValue = new OperationStatusModel();
 		boolean operationResult = userService.requestPasswordReset(passwordResetRequestModel.getEmail());
 		returnValue.setOperationName(RequestOperationName.REQUEST_PASSWORD_RESET.name());
-		returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+		
 		if(operationResult) {
 			returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
 		}
-		return null;
+		else {
+			returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+		}
+		return returnValue;
 	}
 	
 	@PostMapping(path="/password-reset", consumes= {MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE})
